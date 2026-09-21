@@ -1,9 +1,9 @@
 ---
-name: bambu-filament-optimizer
-description: "Tunes Bambu Studio (Bambu Lab A1 mini) settings to use less filament without losing quality. Use for saving filament, lighter parts, or cutting print cost/time."
+name: bambu-print-optimizer
+description: "Tunes Bambu Studio (Bambu Lab A1 mini) print settings - walls, top/bottom, infill, supports - to spend less filament and time without losing quality, then re-slices to prove the savings. Use when the user wants to save filament, make a part lighter, cut the cost or print time of a part, or asks if a print can be made cheaper."
 ---
 
-# Bambu Studio filament optimizer
+# Bambu Studio print optimizer
 
 The goal is to cut filament where nobody sees it (the part's interior) and reinforce what gives quality and strength (walls, top, bottom, supports). Validate every change by re-slicing and comparing the numbers. An estimate made without slicing does not count as a result.
 
