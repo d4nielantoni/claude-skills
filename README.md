@@ -6,9 +6,9 @@ Custom [Agent Skills](https://docs.claude.com/en/docs/agents-and-tools/agent-ski
 
 | Skill | What it does |
 |---|---|
-| [bambu-filament-optimizer](bambu-filament-optimizer/SKILL.md) | Tunes Bambu Studio print settings to use less filament without losing quality or strength, then re-slices to prove the savings. |
+| [bambu-print-optimizer](bambu-print-optimizer/SKILL.md) | Tunes Bambu Studio print settings to use less filament without losing quality or strength, then re-slices to prove the savings. |
 
-## bambu-filament-optimizer
+## bambu-print-optimizer
 
 Claude drives Bambu Studio through computer use: it reads the current slice result, checks the part's size and settings, picks a profile, applies it (globally or per object), re-slices and reports before/after numbers.
 
@@ -34,10 +34,10 @@ Savings depend on the part: bulky, solid parts gain the most, small parts gain l
 
 ```bash
 git clone https://github.com/d4nielantoni/claude-skills.git
-cp -r claude-skills/bambu-filament-optimizer ~/.claude/skills/
+cp -r claude-skills/bambu-print-optimizer ~/.claude/skills/
 ```
 
-**Claude.ai / Claude desktop:** zip the `bambu-filament-optimizer` folder and upload it in the Skills section of Claude's settings.
+**Claude.ai / Claude desktop:** zip the `bambu-print-optimizer` folder and upload it in the Skills section of Claude's settings.
 
 Then just ask something like *"this part is using too much filament, can you optimize the settings?"* with Bambu Studio open.
 
