@@ -63,6 +63,8 @@ Read the output with judgment:
 - a design may be printed lying down — use the orientation the product is displayed in;
 - keychains: report the size without the ring.
 
+**If the f3mf request answers 418 / a captcha, do not try to get around it.** Estimate the size from the photos, using an object of known size in them (a 10x15 photo, an A4 sheet, an instant photo 5.4 x 8.6 cm, a hand), write "aprox." in the listing and add `ATENÇÃO: medidas estimadas pelas fotos do modelo. Confira com a peça impressa.` to `anuncio.txt`; mention it in the report.
+
 Plate weight (g) and print time are in `instances[].extention.modelInfo.plates[]` (`weight`, `prediction` in seconds) — use them for shipping weight and pricing.
 
 ### 4. License

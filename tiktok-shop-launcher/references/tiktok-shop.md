@@ -62,6 +62,7 @@ Write a `produtos.json` for the batch and run `scripts/gerar_textos.py` (writes 
 | Tealight holder (Halloween pumpkin…) | Artigos para casa > Decoração de casa > Castiçais |
 | Desk organiser, pencil holder | Organizadores domésticos > Caixas e recipientes de armazenamento |
 | Hanging ornament | Decoração de casa > Decoração suspensa |
+| Photo frame (10x15, A4) and photo stand / instant-photo holder | Artigos para casa > Decoração de casa > Molduras de foto |
 
 A yellow "Esta categoria pode não ser a ideal…" notice is advisory; red "Problemas críticos" block submission.
 
@@ -76,6 +77,9 @@ A yellow "Esta categoria pode não ser a ideal…" notice is advisory; red "Prob
 | LED village 15 cm | R$ 89,90 |
 | 16–20 cm figure or statue (~200 g, ~9 h) | R$ 119,90 |
 | Large lamp shade 22 cm (~280 g, ~14 h) | R$ 149,90 |
+| Small photo stand (1 piece / kit of 2 / kit of 3) | R$ 19,90 / 24,90 / 39,90 |
+| 10x15 photo frame | R$ 49,90 – 59,90 |
+| A4 frame | R$ 79,90 |
 
 Scale with print grams and hours. Stock: 50 (made to order). Package weight = print grams + packaging (~70 g small, ~150–250 g medium, ~400 g large). Box = measured size + 2–4 cm per side.
 
@@ -83,9 +87,9 @@ Scale with print grams and hours. Stock: 50 (made to order). Package weight = pr
 
 URL: `https://seller-br.tiktok.com/product/create?shop_region=BR` (or Gerenciar produtos → Adicionar produto; after a submit, the success page has an **Adicionar produto** button). One product at a time:
 
-1. **Images:** `find` "image file input near 'Carregar imagem principal'" → `file_upload` the 7 files `_upload_central_midia/<code>_01.jpg … _07.jpg` in one call. Order is kept; 01 becomes the main image. Wait ~6 s.
-2. **Nome do produto:** click the field, `type` the title.
-3. **Categoria:** click the field → a "Sugestão" list with **Aplicar** buttons. Apply the one matching §3; otherwise click the category field and type in its search box (e.g. "Estátuas", "lumin"), then pick. Changing category later shows "Alterar categoria do produto?" → Continuar (attributes are reset).
+1. **Images:** `find` "image file input near 'Carregar imagem principal'" → `file_upload` the 7 files `_upload_central_midia/<code>_01.jpg … _07.jpg` in one call. Order is kept; 01 becomes the main image. Wait ~10 s, until all thumbnails are shown.
+2. **Nome do produto:** click the field (`find` "Nome do produto textbox" — the page may or may not have scrolled after the upload), `type` the title. **Text typed while images are still uploading gets wiped**, so type it after the upload and confirm: `[...document.querySelectorAll('input')].filter(i => i.value.length > 30).map(i => i.value).join(' | ')`.
+3. **Categoria:** click the field → a "Sugestão" list with **Aplicar** buttons. Apply the one matching §3; the list changes as you type, so `zoom` it right before clicking. Otherwise click the category field; the dropdown opens with its **Pesquisar** box at the very top of the page (it may scroll) — click that box, type (e.g. "Molduras de foto", "Estátuas"), then click the matching path. Changing category later shows "Alterar categoria do produto?" → Continuar (attributes are reset).
 4. **Marca:** open the dropdown → `find` 'Selecione "Sem marca"' → click.
 5. **Atributos (Principais):** Material → type "Plás" → tick **Plástico** → Escape. Fill obvious ones (Feriado = Natal, Tipo = Adereço…); leave the rest.
 6. **Descrição:** click inside the rich editor and `type` the description with `\n` line breaks. Verify:
