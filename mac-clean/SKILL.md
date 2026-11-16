@@ -1,5 +1,5 @@
 ---
-name: mac-storage-cleanup
+name: mac-clean
 description: "Use when a Mac is low on disk space or the user asks to clean up or free storage ('my Mac is full', 'free up space', 'disk almost full', 'limpar o computador', 'sem espaço'), when a build or download fails with 'No space left on device', or when the user wants to find apps and files they no longer use. Works with the Mole cleaner (mo)."
 ---
 
