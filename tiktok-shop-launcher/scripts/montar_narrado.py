@@ -25,7 +25,7 @@ import sys
 import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from montar_video import FPS, H, W, caixa_texto, clipe_foto, quadro_foto, run  # noqa: E402
+from montar_video import FPS, H, LEGENDA_Y, W, caixa_texto, clipe_foto, detectar_corte, quadro_foto, run  # noqa: E402
 from PIL import Image, ImageDraw  # noqa: E402
 
 AUDIO = ["-c:a", "aac", "-b:a", "160k", "-ar", "48000", "-ac", "2"]
@@ -34,18 +34,14 @@ AUDIO = ["-c:a", "aac", "-b:a", "160k", "-ar", "48000", "-ac", "2"]
 def legenda_png(texto, escuro, destino):
     ov = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     if texto:
-        caixa_texto(ImageDraw.Draw(ov), texto, 250, escuro)
+        caixa_texto(ImageDraw.Draw(ov), texto, LEGENDA_Y, escuro)
     ov.save(destino)
 
 
 def parte_video(p, destino, tmp, i):
     src = os.path.expanduser(p["video"])
-    probe = subprocess.run(["ffmpeg", "-i", src, "-vf", "cropdetect=24:2:0", "-f", "null", "-"],
-                           stderr=subprocess.PIPE, text=True).stderr
-    crops = [l.split("crop=")[1].split()[0] for l in probe.splitlines() if "crop=" in l]
-    c = f"crop={crops[-1]}," if crops else ""
-    if p.get("crop"):  # Veo often pads a square start frame with blur on top and dark bars below
-        c = f"crop={p['crop']},"
+    # Veo often pads a square start frame with blur on top and dark bars below: a manual crop wins
+    c = f"crop={p['crop']}," if p.get("crop") else detectar_corte(src, p.get("ate"))
     ov = os.path.join(tmp, f"leg{i}.png")
     legenda_png(p.get("legenda", ""), p.get("escuro", False), ov)
     tem_audio = "audio" in subprocess.run(["ffprobe", "-v", "error", "-show_entries", "stream=codec_type",
@@ -59,6 +55,8 @@ def parte_video(p, destino, tmp, i):
     if tem_audio:
         mapa += ["-map", "0:a"]
     else:
+        print(f"AVISO: {os.path.basename(src)} não tem áudio; esse trecho fica mudo. "
+              "Baixe do Flow com 'Retornar vídeos sem áudio' DESLIGADO para manter a narração.", file=sys.stderr)
         entradas += ["-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo"]
         mapa += ["-map", "2:a", "-shortest"]
     run(["ffmpeg", "-y", *entradas, "-filter_complex", fc, *mapa,
@@ -75,7 +73,11 @@ def parte_foto(p, destino, tmp, i):
 
 
 def montar(cfg):
-    tmp = tempfile.mkdtemp()
+    with tempfile.TemporaryDirectory() as tmp:
+        return _montar(cfg, tmp)
+
+
+def _montar(cfg, tmp):
     partes = []
     for i, p in enumerate(cfg["partes"]):
         d = os.path.join(tmp, f"p{i}.mp4")

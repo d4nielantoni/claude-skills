@@ -21,7 +21,8 @@ AGENDA.json:
   ]
 }
 Slide photos are file names inside the product's "fotos" folder (or a path relative to "raiz").
-Each photo slide lasts 3.2 s; keep the total above 10 s (TikTok missions count videos > 10 s).
+Each photo slide lasts 3.2 s. Keep the total above 15 s: TikTok's Start-Up mission only counts
+shoppable videos longer than 15 s (a 5 s clip + 4 photo slides = 17.8 s). Shorter days print a warning.
 """
 import datetime
 import json
@@ -59,9 +60,14 @@ def gerar(ag, dia):
         escuro = s[2] if len(s) > 2 else False
         slides.append([caminho(raiz, prod["fotos"], foto), leg, escuro, 0 if foto is None else DUR])
     cfg = {"saida": base + ".mp4", "slides": slides}
+    total = sum(s[3] for s in slides)
     if dia.get("video"):
         cfg["video"] = caminho(raiz, None, dia["video"])
         cfg["video_ate"] = dia.get("video_ate", 5)
+        total += cfg["video_ate"]
+    if total <= 15:
+        print(f"AVISO {dia['data']}: vídeo com ~{total:.1f} s; a missão Start-Up só conta vídeos com mais de 15 s.",
+              file=sys.stderr)
     montar(cfg)
     texto = (
         f"DATA: {dia['data']} (postar entre 18h e 21h)\n\n"

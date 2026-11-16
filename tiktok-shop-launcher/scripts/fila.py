@@ -6,7 +6,9 @@ Usage:
     python3 fila.py --novos "<NOVOS>" --desde n50      # every product from n50 up
 
 For each product prints: base photo, Flow prompt, listing text, 7 upload photos, TikTok ID,
-and the next step (fotografo / publicador / pronto).
+and the next step (fotografo / publicador / pronto / conferir).
+"conferir" = the publisher reached "Enviar para análise" but wrote no ID: look the product up in
+Gerenciar produtos before publishing again, or it will be listed twice.
 """
 import argparse
 import glob
@@ -35,11 +37,14 @@ def estado(novos, code):
              textos="TÍTULO DO ANÚNCIO" in txt,
              fotos=fotos,
              id=m.group(1) if m else "",
+             enviado="ENVIADO PARA ANÁLISE" in txt,
              status=st[-1].strip() if st else "")
     if e["id"]:
         e["proximo"] = "pronto"
-    elif fotos == 7 and e["textos"]:
-        e["proximo"] = "publicador"
+    elif e["enviado"]:
+        e["proximo"] = "conferir no Seller Center (enviado, sem ID)"
+    elif fotos == 7:
+        e["proximo"] = "publicador" if e["textos"] else "orquestrador (fase 5: textos)"
     elif e["base"] and e["prompt"]:
         e["proximo"] = "fotografo"
     else:
