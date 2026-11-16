@@ -10,7 +10,7 @@ Hard rules for every generation prompt (photos, redos and videos):
 - If the product has text that is part of the design (e.g. a flag saying "Vibe Coder", a plaque on a base), say it must stay exactly as in the original photo, and add it as the only exception to the no-text rule.
 
 ```text
-{ACABAMENTO} = Acabamento perfeito: superfícies lisas e limpas, sem rebarbas, sem fiapos, sem linhas de camada aparentes, sem bolhas, sem marcas de suporte e sem imperfeições.
+{ACABAMENTO} = Acabamento perfeito: superfícies lisas e limpas, sem rebarbas, sem fiapos, sem linhas de camada aparentes, sem bolhas de ar, sem marcas de suporte e sem imperfeições.
 ```
 
 ## 1. Photo prompt — 7 photos (one Flow session, one product)

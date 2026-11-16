@@ -1,6 +1,6 @@
 ---
 name: tiktok-shop-launcher
-description: "Turns 3D-model links (MakerWorld or Printables) for products the user prints and sells into finished TikTok Shop launches: measures the real size from the model file, generates 7 ad photos and a showcase video per product in Google Flow (one isolated Flow project per product), builds 1080x1920 posting videos with captions, writes titles, descriptions, captions and hashtags, and submits each product through TikTok Seller Center's single-product form. Use when the user sends model links and asks to create ads, photos or videos, 'subir no TikTok Shop', 'cadastrar os produtos', 'gerar anúncios', or to run the full product-launch flow for their 3D-print shop."
+description: "Turns 3D-model links (MakerWorld or Printables) for products the user prints and sells into finished TikTok Shop launches: measures the real size from the model file, generates 7 ad photos and a showcase video per product in Google Flow (one isolated Flow project per product), builds 1080x1920 posting videos with captions, writes titles, descriptions, captions and hashtags, and submits each product through TikTok Seller Center's single-product form. Batches run as a conveyor belt of subagents: photographers generate each product's photos while a publisher already submits the products whose photos are done. Use when the user sends model links and asks to create ads, photos or videos, 'subir no TikTok Shop', 'cadastrar os produtos', 'gerar anúncios', or to run the full product-launch flow for their 3D-print shop."
 ---
 
 # TikTok Shop launcher (MakerWorld → Flow → TikTok Shop)
@@ -48,6 +48,26 @@ Shop folders (keep these names exactly — earlier batches use them):
 
 Next product code: one above the highest existing `nXX` in `NOVOS/`. Next video number: one above the highest `NN` in `Para postar - versao final/`. Codes are short ASCII slugs (`n24-gato`).
 
+## Pipeline mode with subagents (default for 2+ products)
+
+The user asked for launches to run as a conveyor belt, with these roles:
+
+- **You (orchestrator):** do Phase 1 and Phase 5 for every product first. Then you only coordinate.
+- **Photographer subagents:** one per product, at most 2 at a time. They do Phase 2 (Flow photos).
+- **Publisher subagents:** one per product, at most 1 at a time. Each starts as soon as that product's photos are saved, and does Phase 6 (Seller Center).
+
+The full procedure, the two subagent prompt templates and the concurrency rules are in [references/subagents.md](references/subagents.md). Read it before starting a batch.
+
+- Launch subagents with the Agent tool: `subagent_type: "general-purpose"`, `run_in_background: true`. Use one product per subagent and a self-contained prompt from the templates.
+- Each finished subagent notifies you; that notification is the trigger for the next step. Never poll or sleep.
+- `scripts/fila.py --novos "<NOVOS>" <codes…>` shows what each product still needs (fotógrafo / publicador / pronto). Use it after every notification and to resume an interrupted batch.
+- Shared resources:
+  - Every subagent works only in its own Chrome tab.
+  - Never use the clipboard: the user and the other agents share it. Type text instead.
+  - Flow downloads go to `~/Downloads`; keep the per-product prefixes.
+  - Do videos (Phase 3–4) yourself, after the belt finishes, because Flow credits are shared.
+- With a single product, just run the phases yourself in order.
+
 ## Phase 1 — Model data and real size
 
 For each link, follow [references/makerworld.md](references/makerworld.md):
@@ -59,6 +79,8 @@ For each link, follow [references/makerworld.md](references/makerworld.md):
 Write down per product: name idea, what it looks like, measurements, colours, grams, hours, creator, license, small vs large (≈ 12 cm threshold), and which category it will go in ([references/tiktok-shop.md](references/tiktok-shop.md) §3).
 
 ## Phase 2 — Ad photos in Google Flow (per product)
+
+In pipeline mode this phase is done by a **photographer subagent**, one product each ([references/subagents.md](references/subagents.md)). The steps below are what its prompt tells it to do.
 
 Follow [references/google-flow.md](references/google-flow.md).
 
@@ -104,6 +126,8 @@ See the docstring in `scripts/montar_video.py` for the JSON format. Check the ou
 
 ## Phase 5 — Listing texts
 
+In pipeline mode, do this for **all products right after Phase 1, before any photos exist**. Publishers need `anuncio.txt` and a `WORK/spec_<code>.json` (format in `subagents.md`) the moment their photos are ready.
+
 Build `produtos.json` (format in `tiktok-shop.md` §2) following the shop's conventions (title pattern, bullets, footer, credit line, caption with "Toque na sacola laranja", 5 + extra hashtags), then:
 
 ```bash
@@ -113,6 +137,8 @@ python3 scripts/gerar_textos.py produtos.json --novos "<…/NOVOS>" --videos "<�
 Pick prices and shipping from `tiktok-shop.md` §4 (they are suggestions — say so in the report). The print-wording setting for listing text is at the top of `tiktok-shop.md`.
 
 ## Phase 6 — Publish on TikTok Shop
+
+In pipeline mode this phase is done by a **publisher subagent**, one product at a time, each starting as soon as that product's photos are saved. After the last one finishes, you still do the final check in Gerenciar produtos yourself.
 
 For each product, fill the single-product form exactly as in `tiktok-shop.md` §5: 7 images → title → category → "Sem marca" → Material = Plástico → description (verify text) → colour variations if any → stock 50, SKU, price (integer then ",90", zoom to verify) → weight and box → no "Problemas críticos" → **Enviar para análise**.
 
@@ -127,6 +153,7 @@ Plain PT-BR, non-technical, short (format in `tiktok-shop.md` §8): table of pro
 ## Known pitfalls (from the first run)
 
 - MakerWorld blocks curl on pages — use the browser; tool output that contains signed URLs is redacted, so return base64 or pathnames.
+- MakerWorld's 3MF download can answer with a captcha (418) — never bypass it; estimate sizes from the photos (`makerworld.md` §3).
 - Flow's prompt box is a contenteditable; the `<textarea>` on the page is reCAPTCHA.
 - Flow invents text on props (book titles, "MY BRAND" on a desk) — the prompt's no-text rule now names props, but still check every image.
 - Rotating a product makes Veo invent the unseen side (a globe grew a glass dome) — prefer tilt/push-in for such shapes.

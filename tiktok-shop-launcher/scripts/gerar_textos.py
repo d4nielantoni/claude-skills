@@ -10,7 +10,8 @@ Usage:
 produtos.json is a list of objects (see references/tiktok-shop.md for a full example):
   code, pasta, num, video, titulo, nome_curto (<=30 chars), desc (intro + "• " bullets),
   criador (or credito to override the whole credit line), site (default "MakerWorld"),
-  preco, peso (g), cx [comprimento, largura, altura] (cm), legenda, tags, extras, atencao (optional)
+  preco, peso (g), cx [comprimento, largura, altura] (cm), legenda, tags, extras, atencao (optional),
+  rodape (optional: replaces the made-to-order footer, e.g. without print wording)
 
 The made-to-order footer below is the shop's current wording. The user asked to keep
 "impresso em 3D" out of IMAGE/VIDEO PROMPTS; listing text still uses it. To drop it from listings
@@ -46,7 +47,7 @@ def main():
 
     for p in json.load(open(os.path.expanduser(a.produtos))):
         assert len(p["nome_curto"]) <= 30, f"nome_curto > 30: {p['nome_curto']}"
-        desc = p["desc"] + "\n\n" + RODAPE + "\n\n" + credito(p)
+        desc = p["desc"] + "\n\n" + p.get("rodape", RODAPE) + "\n\n" + credito(p)
         c, l, h = p["cx"]
         preco = f"{p['preco']:.2f}".replace(".", ",")
         atencao = f"\n{p['atencao']}\n" if p.get("atencao") else ""
