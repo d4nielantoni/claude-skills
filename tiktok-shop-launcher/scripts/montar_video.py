@@ -11,14 +11,15 @@ config.json:
   "video": "/path/Flow - mao mostrando/15 - Gato articulado (mao).mp4",   # optional, null for photo-only
   "video_ate": 2.5,                       # optional: keep only the first N seconds of the clip
   "slides": [
-    [null, "Hook caption shown over the clip", false, 0],            # first item = clip caption when "video" is set
+    [null, "Hook caption shown over the clip", false, 0],            # optional: clip caption (only with "video")
     ["/path/01 - foto1_principal.jpg", "Benefit caption", false, 3.0],
     ["/path/04 - foto4_ambiente.jpg", "", false, 3.0],
     ["/path/07 - foto7_presente.jpg", "Presente geek certeiro", true, 3.0],   # true = dark caption box
     ["/path/02 - foto2_angulo.jpg", "Toque na sacola laranja e garanta o seu", false, 3.0]
   ]
 }
-Without "video", the first slide is a normal photo slide (use the hook caption on it).
+A first slide with null instead of a photo is the caption over the clip; it is only allowed with "video".
+Without it the clip has no caption. Without "video", every slide must be a photo (put the hook on the first).
 Aim for 16–22 s total: TikTok's Start-Up mission only counts shoppable videos longer than 15 s.
 Veo clips from square photos come letterboxed; black bars are detected, cropped and replaced by blur.
 """
@@ -93,10 +94,10 @@ def quadro_foto(foto, legenda, escuro, destino):
     tela.save(destino, quality=95)
 
 
-def sobreposicao_legenda(legenda, destino):
+def sobreposicao_legenda(legenda, destino, escuro=False):
     ov = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     if legenda:
-        caixa_texto(ImageDraw.Draw(ov), legenda, LEGENDA_Y, False)
+        caixa_texto(ImageDraw.Draw(ov), legenda, LEGENDA_Y, escuro)
     ov.save(destino)
 
 
@@ -114,13 +115,18 @@ def clipe_foto(img, dur, destino, zoom_in=True):
          "-frames:v", str(n), "-c:v", "libx264", "-preset", "medium", "-crf", "20", destino])
 
 
-def clipe_video(mp4, legenda, destino, tmp, ate=None):
-    probe = subprocess.run(["ffmpeg", "-i", mp4, "-vf", "cropdetect=24:2:0", "-f", "null", "-"],
+def detectar_corte(mp4, ate=None):
+    corte = ["-t", str(ate)] if ate else []
+    probe = subprocess.run(["ffmpeg", *corte, "-i", mp4, "-vf", "cropdetect=24:2:0", "-f", "null", "-"],
                            stderr=subprocess.PIPE, text=True).stderr
     crops = [l.split("crop=")[1].split()[0] for l in probe.splitlines() if "crop=" in l]
-    c = f"crop={crops[-1]}," if crops else ""
+    return f"crop={crops[-1]}," if crops else ""
+
+
+def clipe_video(mp4, legenda, destino, tmp, ate=None, escuro=False):
+    c = detectar_corte(mp4, ate)
     ov = os.path.join(tmp, "leg.png")
-    sobreposicao_legenda(legenda, ov)
+    sobreposicao_legenda(legenda, ov, escuro)
     fc = (f"[0:v]{c}split[a][b];"
           f"[a]scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},gblur=sigma=40[bg];"
           f"[b]scale={W}:-2[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2,fps={FPS}[v];[v][1:v]overlay=0:0,format=yuv420p")
@@ -130,14 +136,23 @@ def clipe_video(mp4, legenda, destino, tmp, ate=None):
 
 
 def montar(cfg):
-    tmp = tempfile.mkdtemp()
+    with tempfile.TemporaryDirectory() as tmp:
+        return _montar(cfg, tmp)
+
+
+def _montar(cfg, tmp):
     partes = []
-    slides = cfg["slides"]
+    slides = list(cfg["slides"])
+    legenda_clipe = slides.pop(0) if slides and slides[0][0] is None else None
+    if any(s[0] is None for s in slides):
+        raise SystemExit("Só o primeiro slide pode ser [null, legenda] (a legenda do clipe).")
+    if legenda_clipe and not cfg.get("video"):
+        raise SystemExit("Slide [null, legenda] sem \"video\": coloque a legenda na primeira foto.")
     if cfg.get("video"):
         p = os.path.join(tmp, "v.mp4")
-        clipe_video(os.path.expanduser(cfg["video"]), slides[0][1], p, tmp, cfg.get("video_ate"))
+        leg, escuro = (legenda_clipe[1], len(legenda_clipe) > 2 and legenda_clipe[2]) if legenda_clipe else ("", False)
+        clipe_video(os.path.expanduser(cfg["video"]), leg, p, tmp, cfg.get("video_ate"), escuro)
         partes.append(p)
-        slides = slides[1:]
     for i, (foto, leg, escuro, dur) in enumerate(slides):
         img = os.path.join(tmp, f"s{i}.jpg")
         quadro_foto(os.path.expanduser(foto), leg, escuro, img)

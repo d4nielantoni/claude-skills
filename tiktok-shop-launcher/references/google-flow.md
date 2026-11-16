@@ -95,7 +95,7 @@ await window.__grab('flow_n24')      // later redos: await window.__grab('flow_n
 - DOM order is not generation order. Assign slots by looking at the sheet, not by index.
 - If the base photo you uploaded is exactly 1024×1024 it will be grabbed too — ignore it on the sheet.
 - One specific image: open it and download the largest displayed `<img>` (sort by `getBoundingClientRect().width`).
-- `__grab` only sees images the page has loaded (the filmstrip loads lazily), so a batch can come back short. Count the files; if any are missing, open each missing image and use the edit view's **download icon → 1K** (lands in `~/Downloads` with Flow's own name — move files newer than a marker file). The list view's "Baixar lote" zip download worked at first and then silently stopped; don't rely on it.
+- `__grab` only sees images the page has loaded (the filmstrip loads lazily), so a batch can come back short. Count the files; if any are missing, open each missing image and use the edit view's **download icon → 1K**. It lands in `~/Downloads` with Flow's own name, and another photographer may be downloading at the same time, so do it **one image at a time**: note the newest file before clicking, wait for the new one, and rename it right away to `flow_<code>_fb_<n>.jpeg`. Never move a batch of "files newer than X": they can belong to another product. The list view's "Baixar lote" zip download worked at first and then silently stopped; don't rely on it.
 
 ## Review checklist (photos)
 

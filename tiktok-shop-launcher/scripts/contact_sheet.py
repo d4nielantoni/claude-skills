@@ -32,7 +32,11 @@ def main():
     os.makedirs(pasta, exist_ok=True)
     if a.collect:
         for f in glob.glob(os.path.expanduser(a.collect)):
-            shutil.move(f, os.path.join(pasta, os.path.basename(f)))
+            nome, ext = os.path.splitext(os.path.basename(f))
+            destino, n = os.path.join(pasta, nome + ext), 2
+            while os.path.exists(destino):  # a second redo can reuse a name: keep both
+                destino, n = os.path.join(pasta, f"{nome}_{n}{ext}"), n + 1
+            shutil.move(f, destino)
 
     fs = sorted(f for f in glob.glob(os.path.join(pasta, "*")) if f.lower().endswith(EXTS))
     if not fs:

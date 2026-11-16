@@ -52,7 +52,8 @@ Space is measured on `/System/Volumes/Data`, the real data volume; `df -h /` sho
    /bin/bash -c 'npm cache clean --force; pnpm store prune; python3 -m pip cache purge; brew cleanup --prune=all'
    ```
 
-4. **Docker** (only when it is running). This is usually the biggest win, often 3 to 10 GB:
+4. **Docker** (only when it is running). This is usually the biggest win, often 3 to 10 GB.
+   First check the engine version: `docker version --format '{{.Server.Version}}'`. **Below 23, skip `docker volume prune`**: in those versions it also deletes named volumes, which hold the projects' databases.
    ```bash
    docker builder prune -a -f
    docker image prune -a -f --filter "until=168h"

@@ -22,10 +22,8 @@ Never put franchise/character/brand names in titles, descriptions or hashtags (n
 • <inclui / não inclui (vela/luz de LED não inclusa…)>
 
 Peça produzida sob encomenda em impressora 3D: pequenas marcas de camada fazem parte do processo. Não indicado para menores de 3 anos (contém partes pequenas).
-
-Modelo 3D por <creator> (MakerWorld), licença comercial.
 ```
-Seller Center strips non-Latin characters; for such creator names use `Modelo 3D de designer da MakerWorld, com licença comercial.` (`gerar_textos.py` does this automatically).
+No credit line for the model's creator: the user holds the selling license.
 
 **Posting caption:** hook + emoji, one sentence with the key size/feature, CTA `Toque na sacola laranja e garanta o seu!` (or `a sua`).
 **Hashtags:** 5 suggested (`#<categoria> #<nicho> #<tema> #presentegeek #impressao3d`) + extras (`#tiktokshop #achadinhosdotiktok #tiktokmefezcomprar #feitoem3d #presentecriativo` + 2–3 niche tags).
@@ -41,7 +39,6 @@ Write a `produtos.json` for the batch and run `scripts/gerar_textos.py` (writes 
   "titulo": "Gato Articulado Flexi – Brinquedo Fidget e Decoração – Impressão 3D – Presente",
   "nome_curto": "Gato Articulado Flexi",
   "desc": "Gatinho articulado que mexe todo o corpo…\n\n• Medidas: 15 cm de comprimento\n• Material: plástico PLA impresso em 3D\n• Cor: laranja",
-  "criador": "Jacek Maryniowski", "site": "Printables",
   "preco": 29.90, "peso": 100, "cx": [16, 10, 5],
   "legenda": "Ele mexe tudo 😻 Gatinho articulado de 15 cm… Toque na sacola laranja e garanta o seu!",
   "tags": "#gato #fidget #brinquedo #presentegeek #impressao3d",
@@ -132,7 +129,7 @@ Automated uploads of videos to Seller Center/TikTok hang at 1%, so the user post
 
 Plain PT-BR, non-technical (no file paths, framework or code names unless asked). Include:
 - a table: produto | preço | status (Ativo / Em análise / bloqueado);
-- decisions you took on your own (prices, categories, LED included or not, removed credits…), each with how to change it;
+- decisions you took on your own (prices, categories, LED included or not, …), each with how to change it;
 - anything blocked or skipped (policy refusal → photo-only video, credits exhausted → videos pending after 20:04, photos you could not fix);
 - (no license notes: sending the link already means the user can sell it);
 - what the user still has to do (post the videos).

@@ -9,13 +9,15 @@ Usage:
 
 produtos.json is a list of objects (see references/tiktok-shop.md for a full example):
   code, pasta, num, video, titulo, nome_curto (<=30 chars), desc (intro + "• " bullets),
-  criador (or credito to override the whole credit line), site (default "MakerWorld"),
   preco, peso (g), cx [comprimento, largura, altura] (cm), legenda, tags, extras, atencao (optional),
   rodape (optional: replaces the made-to-order footer, e.g. without print wording)
 
 The made-to-order footer below is the shop's current wording. The user asked to keep
 "impresso em 3D" out of IMAGE/VIDEO PROMPTS; listing text still uses it. To drop it from listings
 too, edit RODAPE here and the "Material:" bullet in each product's desc.
+
+Running it again is safe: anything already appended to an existing anuncio.txt (the "TIKTOK SHOP"
+block with the product ID, "ENVIADO PARA ANÁLISE", "ATENÇÃO" notes) is kept at the end.
 """
 import argparse
 import json
@@ -25,15 +27,20 @@ RODAPE = ("Peça produzida sob encomenda em impressora 3D: pequenas marcas de ca
           "Não indicado para menores de 3 anos (contém partes pequenas).")
 
 
-def credito(p):
-    if p.get("credito"):
-        return p["credito"]
-    criador = p.get("criador", "")
-    site = p.get("site", "MakerWorld")
-    # Seller Center strips non-Latin characters (e.g. Chinese names), so fall back to a generic credit
-    if not criador or not criador.isascii():
-        return f"Modelo 3D de designer da {site}, com licença comercial."
-    return f"Modelo 3D por {criador} ({site}), licença comercial."
+def anotacoes(caminho, novo):
+    """Lines appended to an existing anuncio.txt after it was generated (publish result, notes)."""
+    if not os.path.exists(caminho):
+        return ""
+    linhas = open(caminho).read().splitlines()
+    for i, ln in enumerate(linhas):
+        if ln.startswith("TIKTOK SHOP") or ln.startswith("ENVIADO PARA ANÁLISE"):
+            resto = linhas[i:]
+            break
+    else:
+        resto = []
+    notas = [ln for ln in linhas if ln.startswith("ATENÇÃO") and ln not in novo and ln not in resto]
+    bloco = "\n".join(notas + resto).strip()
+    return f"\n{bloco}\n" if bloco else ""
 
 
 def main():
@@ -47,7 +54,7 @@ def main():
 
     for p in json.load(open(os.path.expanduser(a.produtos))):
         assert len(p["nome_curto"]) <= 30, f"nome_curto > 30: {p['nome_curto']}"
-        desc = p["desc"] + "\n\n" + p.get("rodape", RODAPE) + "\n\n" + credito(p)
+        desc = p["desc"] + "\n\n" + p.get("rodape", RODAPE)
         c, l, h = p["cx"]
         preco = f"{p['preco']:.2f}".replace(".", ",")
         atencao = f"\n{p['atencao']}\n" if p.get("atencao") else ""
@@ -55,7 +62,9 @@ def main():
                    f"PREÇO SUGERIDO: R$ {preco}\nPESO COM EMBALAGEM (estimado): {p['peso']} g\n"
                    f"CAIXA (estimada): {c} x {l} x {h} cm\n"
                    f"FOTOS: pasta \"2 - fotos para o anuncio\" (7 fotos, na ordem)\n{atencao}")
-        with open(os.path.join(novos, p["pasta"], "anuncio.txt"), "w") as f:
+        caminho = os.path.join(novos, p["pasta"], "anuncio.txt")
+        anuncio += anotacoes(caminho, anuncio)
+        with open(caminho, "w") as f:
             f.write(anuncio)
         post = (f"PRODUTO PARA VINCULAR NO VÍDEO\n{p['titulo']}\n\nNOME CURTO (máx. 30 letras)\n{p['nome_curto']}\n\n"
                 f"LEGENDA DO VÍDEO (copie e cole na Descrição)\n{p['legenda']}\n\n"

@@ -1,6 +1,6 @@
 # Getting product data from MakerWorld (and Printables)
 
-Goal per link: title, creator, license, photos, plate weight / print time, and the **real size** of the profile the user linked.
+Goal per link: title, photos, plate weight / print time, and the **real size** of the profile the user linked.
 
 ## MakerWorld
 
@@ -13,7 +13,7 @@ The user's link usually ends in `#profileId-<n>`: that is the **instance/print p
 ```js
 const d = window.__NEXT_DATA__.props.pageProps.design;
 JSON.stringify({
-  id: d.id, title: d.title, creator: d.designCreator?.name, license: d.license,
+  id: d.id, title: d.title,
   pics: (d.designExtension?.design_pictures || []).map(p => p.url.split('/makerworld/model/')[1]),
   inst: (d.instances || []).map(i => i.id + ':' + i.title + ':' +
     (i.extention?.modelInfo?.plates || []).map(p => p.weight + 'g/' + Math.round(p.prediction / 60) + 'min').join(','))
@@ -69,10 +69,9 @@ Plate weight (g) and print time are in `instances[].extention.modelInfo.plates[]
 
 ### 4. License
 
-Sending a link means the user already holds the license to sell prints of that model — it is implied, they don't have to say it. Never ask, never block, and don't put license warnings in the report. Reading `license` is only useful for the credit line in the listing (e.g. CC BY on Printables requires attribution).
+Sending a link means the user already holds the license to sell prints of that model — it is implied, they don't have to say it. Never ask, never block, and don't put license warnings in the report. Listings carry no creator credit.
 
 ## Printables
 
 Earlier batches came from Printables. The user's script `~/Downloads/Produtos 3D - Datas Comemorativas/baixar_modelos.py` uses the public GraphQL API (`https://api.printables.com/graphql/`, images from `https://media.printables.com/`) and already filters models whose license allows selling prints. Model files there are usually STL; `scripts/bbox3mf.py` measures `.stl` too (binary and ASCII). Earlier measurements live in `medidas_cm.json` in the same folder.
 
-Credit line in listings: `Modelo 3D por <creator> (Printables), licença <CC …>.` — CC BY/BY-SA require attribution.
