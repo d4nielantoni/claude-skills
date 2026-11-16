@@ -8,7 +8,7 @@ Custom [Agent Skills](https://docs.claude.com/en/docs/agents-and-tools/agent-ski
 |---|---|
 | [bambu-print-optimizer](bambu-print-optimizer/SKILL.md) | Tunes Bambu Studio print settings to use less filament without losing quality or strength, then re-slices to prove the savings. |
 | [tiktok-shop-launcher](tiktok-shop-launcher/SKILL.md) | Turns MakerWorld/Printables model links into live TikTok Shop listings: real measurements, Google Flow ad photos and videos, captioned posting videos, listing texts and Seller Center submission. |
-| [mac-storage-cleanup](mac-storage-cleanup/SKILL.md) | Frees disk space on a Mac: runs the Mole cleaner first, then finds what it leaves behind (Docker, project builds, developer caches, unused apps) and cleans only what is safe, asking before anything else. |
+| [mac-clean](mac-clean/SKILL.md) | Frees disk space on a Mac: runs the Mole cleaner first, then finds what it leaves behind (Docker, project builds, developer caches, unused apps) and cleans only what is safe, asking before anything else. |
 
 ## bambu-print-optimizer
 
@@ -70,7 +70,7 @@ cp -r claude-skills/tiktok-shop-launcher ~/.claude/skills/
 
 Then ask something like *"aqui estão os links dos modelos, crie as fotos e vídeos e suba no TikTok Shop"*.
 
-## mac-storage-cleanup
+## mac-clean
 
 Claude runs [Mole](https://github.com/tw93/Mole) first and stops there if it freed enough space. If the disk is still tight, it scans the Mac with a read-only script and sorts what it finds into three groups:
 
@@ -88,7 +88,7 @@ Docker databases are never touched. Apps that need an admin password come back a
 **Installation**
 
 ```bash
-cp -r claude-skills/mac-storage-cleanup ~/.claude/skills/
+cp -r claude-skills/mac-clean ~/.claude/skills/
 ```
 
 Then ask something like *"my Mac is almost full, can you free up some space?"*.
